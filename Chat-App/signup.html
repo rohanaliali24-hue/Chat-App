@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat App - Signup</title>
+    <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+
+    <div class="auth-container">
+        <h1>Chat App</h1>
+        <h2>Create Account</h2>
+        <p>Join our community</p>
+
+        <form id="register-form">
+
+            <input type="text" id="register-name" placeholder="Full Name" minlength="2" maxlength="80" required>
+
+            <input type="email" id="register-email" placeholder="Email Address" required>
+
+            <input type="password" id="register-password" placeholder="Password (minimum 6 characters)" minlength="6"
+                required>
+
+            <button type="submit" id="signup-btn">
+                Sign Up
+            </button>
+
+            <p id="signup-message" role="status"></p>
+
+        </form>
+
+        <p>
+            Already have an account?
+            <a href="./login.html">Login here</a>
+        </p>
+    </div>
+
+    <script type="module" src="./auth.js"></script>
+</body>
+
+</html>

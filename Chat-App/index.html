@@ -1,0 +1,640 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Facebook Chat Dashboard</title>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f0f2f5;
+      color: #050505;
+    }
+
+    .navbar {
+      height: 58px;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 18px;
+      position: fixed;
+      inset: 0 0 auto;
+      z-index: 10;
+      box-shadow: 0 1px 4px #0002;
+    }
+
+    .nav-left, .nav-center, .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .fb-logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: #0866ff;
+      color: white;
+      font-size: 38px;
+      font-weight: bold;
+      display: grid;
+      place-items: center;
+    }
+
+    .nav-left input {
+      width: 240px;
+      border: 0;
+      outline: 0;
+      border-radius: 24px;
+      padding: 12px 16px;
+      background: #f0f2f5;
+    }
+
+    .nav-center {
+      gap: 42px;
+      color: #65676b;
+      font-size: 24px;
+    }
+
+    .nav-icon { padding: 10px 16px; }
+
+    .nav-icon.active {
+      color: #0866ff;
+      border-bottom: 3px solid #0866ff;
+    }
+
+    .nav-circle, .profile-small {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: #e4e6eb;
+    }
+
+    .profile-small {
+      background: #0866ff;
+      color: white;
+      font-weight: bold;
+    }
+
+    .logout-btn {
+      border: 0;
+      border-radius: 7px;
+      padding: 10px 14px;
+      background: #e4e6eb;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: 260px minmax(400px, 1fr) 260px;
+      gap: 18px;
+      height: calc(100vh - 58px);
+      margin-top: 58px;
+      padding: 16px 20px;
+    }
+
+    .left-sidebar, .right-sidebar {
+      overflow-y: auto;
+      min-width: 0;
+    }
+
+    .left-sidebar { padding: 0 8px; }
+
+    .profile-item, .sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-height: 48px;
+      padding: 7px 10px;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .profile-item {
+      font-weight: bold;
+      margin-bottom: 14px;
+    }
+
+    .profile-img, .user-avatar {
+      width: 38px;
+      height: 38px;
+      flex: 0 0 38px;
+      border-radius: 50%;
+      background: #0866ff;
+      color: white;
+      display: grid;
+      place-items: center;
+      font-weight: bold;
+    }
+
+    .sidebar-heading {
+      color: #65676b;
+      font-size: 16px;
+      padding: 10px;
+      border-top: 1px solid #ddd;
+    }
+
+    #users-list {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .user-item {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      min-height: 54px;
+    }
+
+    .user-item:hover { background: #e4e6eb; }
+
+    .user-details {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      gap: 3px;
+    }
+
+    .user-details strong {
+      font-size: 14px;
+      overflow-wrap: anywhere;
+    }
+
+    .user-details small {
+      color: #65676b;
+      font-size: 11px;
+    }
+
+    .center-content {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      overflow: hidden;
+    }
+
+    .composer-card, .chat-card {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 1px 3px #0001;
+    }
+
+    .composer-card {
+      padding: 14px 18px;
+      flex: 0 0 auto;
+    }
+
+    .composer-top {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .user-avatar {
+      flex-basis: 40px;
+      width: 40px;
+      height: 40px;
+    }
+
+    .chat-form {
+      flex: 1;
+      min-width: 0;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+    }
+
+    #message-input {
+      width: 100%;
+      height: 44px;
+      border: 0;
+      outline: 0;
+      background: #f0f2f5;
+      border-radius: 24px;
+      padding: 0 16px;
+    }
+
+    #send-btn {
+      border: 0;
+      border-radius: 9px;
+      background: #0866ff;
+      color: white;
+      font-weight: bold;
+      padding: 0 18px;
+      cursor: pointer;
+    }
+
+    #send-btn:disabled,
+    .logout-btn:disabled,
+    .delete-btn:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+    }
+
+    #chat-error {
+      grid-column: 1 / -1;
+      color: #d93025;
+      font-size: 12px;
+    }
+
+    .composer-actions {
+      display: flex;
+      justify-content: space-around;
+      gap: 8px;
+      border-top: 1px solid #eee;
+      margin-top: 12px;
+      padding-top: 12px;
+      color: #65676b;
+      font-size: 13px;
+    }
+
+    .chat-card {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .chat-heading {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 18px;
+      border-bottom: 1px solid #e4e6eb;
+    }
+
+    .chat-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #e4e6eb;
+      display: grid;
+      place-items: center;
+    }
+
+    .chat-heading h2 { font-size: 16px; }
+
+    .chat-heading p {
+      color: #65676b;
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    #chat-box {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* MESSAGE ALIGNMENT */
+    .message {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      width: fit-content;
+      max-width: 78%;
+      padding: 0;
+      background: transparent;
+    }
+
+    .message.sent {
+      align-self: flex-end;
+      align-items: flex-end;
+    }
+
+    .message.received {
+      align-self: flex-start;
+      align-items: flex-start;
+    }
+
+    .message-content {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      padding: 11px 15px;
+      border-radius: 15px;
+      overflow-wrap: anywhere;
+    }
+
+    .message.sent .message-content {
+      background: #0866ff;
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+
+    .message.received .message-content {
+      background: #e4e6eb;
+      color: #050505;
+      border-bottom-left-radius: 4px;
+    }
+
+    .message-content strong { font-size: 12px; }
+
+    .message-text {
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    /* DELETE BUTTON BELOW MESSAGE */
+    .delete-button-box {
+      display: flex;
+      width: 100%;
+      justify-content: flex-end;
+    }
+
+    .delete-btn {
+      background: #e74c3c;
+      color: white;
+      border: 0;
+      border-radius: 6px;
+      padding: 6px 11px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+
+    .delete-btn:hover { background: #c0392b; }
+
+    .empty-message {
+      color: #65676b;
+      text-align: center;
+      margin: auto;
+      font-size: 14px;
+    }
+
+    .right-sidebar { padding: 0 8px; }
+
+    .right-sidebar h3 {
+      color: #65676b;
+      font-size: 15px;
+      margin: 8px 0 14px;
+    }
+
+    .sponsored {
+      display: flex;
+      gap: 12px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #ccc;
+    }
+
+    .sponsored-image {
+      width: 90px;
+      height: 85px;
+      flex: 0 0 90px;
+      display: grid;
+      place-items: center;
+      background: #e4e6eb;
+      color: #0866ff;
+      font-weight: bold;
+    }
+
+    .sponsored-text strong { font-size: 13px; }
+
+    .sponsored-text p,
+    .sponsored-text small {
+      display: block;
+      color: #65676b;
+      font-size: 12px;
+      margin-top: 6px;
+      line-height: 1.4;
+    }
+
+    .contacts-section, .group-section {
+      padding: 16px 0;
+      border-bottom: 1px solid #ccc;
+    }
+
+    .contact-item, .create-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 5px;
+      font-size: 13px;
+    }
+
+    .online-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: #0866ff;
+      color: white;
+    }
+
+    @media (max-width: 1050px) {
+      .dashboard {
+        grid-template-columns: 220px minmax(0, 1fr);
+      }
+
+      .right-sidebar { display: none; }
+      .nav-center { gap: 10px; }
+    }
+
+    @media (max-width: 650px) {
+      body { overflow: auto; }
+
+      .navbar { padding: 0 10px; }
+
+      .nav-left input,
+      .nav-center,
+      .nav-circle,
+      .profile-small {
+        display: none;
+      }
+
+      .dashboard {
+        display: block;
+        height: auto;
+        min-height: calc(100vh - 58px);
+        padding: 10px;
+      }
+
+      .left-sidebar { display: none; }
+
+      .center-content { height: calc(100vh - 78px); }
+
+      .composer-card { padding: 10px; }
+
+      .composer-actions { font-size: 10px; }
+
+      .chat-form {
+        grid-template-columns: minmax(0, 1fr) auto;
+      }
+
+      #send-btn {
+        padding: 0 10px;
+        font-size: 12px;
+      }
+
+      .message { max-width: 88%; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- NAVBAR -->
+  <header class="navbar">
+
+    <div class="nav-left">
+      <div class="fb-logo">f</div>
+      <input type="text" placeholder="Search Facebook">
+    </div>
+
+    <div class="nav-center">
+      <div class="nav-icon active">⌂</div>
+      <div class="nav-icon">♟</div>
+      <div class="nav-icon">▣</div>
+      <div class="nav-icon">♣</div>
+      <div class="nav-icon">🎮</div>
+    </div>
+
+    <div class="nav-right">
+      <div class="nav-circle">▦</div>
+      <div class="nav-circle">●</div>
+      <div class="profile-small" id="top-profile-letter">U</div>
+
+      <button type="button" id="logout-btn" class="logout-btn">
+        Logout
+      </button>
+    </div>
+
+  </header>
+
+  <!-- DASHBOARD -->
+  <div class="dashboard">
+
+    <!-- LEFT SIDEBAR -->
+    <aside class="left-sidebar">
+
+      <div class="profile-item">
+        <div class="profile-img" id="profile-letter">U</div>
+        <span id="current-user">Checking user...</span>
+      </div>
+
+      <h3 class="sidebar-heading">All Users</h3>
+
+      <div id="users-list">
+        Loading users...
+      </div>
+
+    </aside>
+
+    <!-- CENTER CONTENT -->
+    <main class="center-content">
+
+      <div class="composer-card">
+
+        <div class="composer-top">
+
+          <div class="user-avatar" id="composer-letter">U</div>
+
+          <form id="chat-form" class="chat-form">
+
+            <input
+              type="text"
+              id="message-input"
+              placeholder="What's on your mind?"
+              autocomplete="off"
+              maxlength="1000"
+              required
+            >
+
+            <button type="submit" id="send-btn">
+              Send Message ➤
+            </button>
+
+            <p id="chat-error" role="status"></p>
+
+          </form>
+
+        </div>
+
+        <div class="composer-actions">
+          <span>🔴 Live video</span>
+          <span>🟢 Photo/video</span>
+          <span>😊 Feeling/activity</span>
+        </div>
+
+      </div>
+
+      <!-- CHAT WINDOW -->
+      <section class="chat-card">
+
+        <div class="chat-heading">
+
+          <div class="chat-avatar">💬</div>
+
+          <div>
+            <h2>Messenger Chat</h2>
+            <p>Real Time Messages</p>
+          </div>
+
+        </div>
+
+        <div id="chat-box">
+          <p class="empty-message">Loading messages...</p>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- RIGHT SIDEBAR -->
+    <aside class="right-sidebar">
+
+      <h3>Sponsored</h3>
+
+      <div class="sponsored">
+        <div class="sponsored-image">AD</div>
+
+        <div class="sponsored-text">
+          <strong>Welcome to Chat App</strong>
+          <p>Stay connected with your friends.</p>
+          <small>chatapp.com</small>
+        </div>
+      </div>
+
+      <div class="contacts-section">
+        <h3>Contacts</h3>
+
+        <div class="contact-item">
+          <div class="online-avatar">A</div>
+          <span>Online Users</span>
+        </div>
+
+        <div class="contact-item">
+          <div class="online-avatar">U</div>
+          <span>Chat Members</span>
+        </div>
+      </div>
+
+      <div class="group-section">
+        <h3>Group chats</h3>
+        <div class="create-group">＋ Create group chats</div>
+      </div>
+
+    </aside>
+
+  </div>
+
+  <script type="module" src="./index.js"></script>
+
+</body>
+</html>
